@@ -12,4 +12,4 @@ then
 	exit 1
 fi
 
-exec "$tree/configure" --prefix=/usr/local --target=riscv32 --disable-gdb --disable-gold --disable-gprof --disable-gprofng
+exec "$tree/configure" --prefix=/usr/local --target=riscv32 --with-arch=rv32i --disable-gdb --disable-gold --disable-gprof --disable-gprofng
