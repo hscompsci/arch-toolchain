@@ -1,0 +1,25 @@
+#!/bin/sh
+
+tree="$1"
+if [ "$#" -ne "1" -o -z "$tree" -o ! -e "$tree/configure" ]
+then
+	echo "USAGE: `basename "$0"` <path to gcc source tree>"
+	exit 1
+elif [ ! -e "$tree/bfd" -o ! -e "$tree/binutils" -o ! -e "$tree/gas" -o ! -e "$tree/gnulib" -o ! -e "$tree/ld" -o ! -e "$tree/libctf" -o ! -e "$tree/libsframe" -o ! -e "$tree/opcodes" ]
+then
+	cat 2>&1 <<-tac
+		ERROR: You must first symlink the following from the binutils source tree into the gcc one:
+			bfd/
+			binutils/
+			gas/
+			gnulib/
+			ld/
+			libctf/
+			libsframe/
+			opcodes/
+			sim/ (optional, available from the repository but not the release tarballs)
+	tac
+	exit 2
+fi
+
+exec "$tree/configure" --prefix=/usr/local --target=riscv32-elf --with-arch=rv32i --program-prefix=riscv32- --enable-languages=c --without-headers
