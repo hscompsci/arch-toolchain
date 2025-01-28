@@ -22,4 +22,4 @@ then
 	exit 2
 fi
 
-exec "$tree/configure" --prefix=/usr/local --target=riscv32-elf --with-arch=rv32i --program-prefix=riscv32- --enable-languages=c --without-headers
+exec "$tree/configure" --prefix=/usr/local --target=riscv32-elf --with-arch=rv32i --program-prefix=riscv32- --disable-libssp --enable-languages=c --without-headers
