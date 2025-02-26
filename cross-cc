@@ -35,4 +35,4 @@ fi
 stdlibs="$prefix/lib/gcc/riscv32-elf/`cat "$tree/gcc/BASE-VER"`"
 mkdir -p "$stdlibs" 2>/dev/null || sudo mkdir -p "$stdlibs"
 touch "$stdlibs/nosys.specs" 2>/dev/null || sudo touch "$stdlibs/nosys.specs"
-exec "$tree/configure" --prefix="$prefix" --target=riscv32-elf --with-arch=rv32i --with-specs='%:if-exists-then-else(nosys.specs%s -specs=nosys.specs %:if-exists-then-else(%:getenv(PWD /nosys.specs) -specs=nosys.specs)) %:if-exists-then-else(%:getenv(PWD /libc.a) -L.)' --program-prefix=riscv32- --disable-libssp --enable-languages=c --without-headers "$@"
+exec "$tree/configure" --prefix="$prefix" --target=riscv32-elf --with-arch=rv32i --with-specs='%:if-exists-then-else(nosys.specs%s -specs=nosys.specs %:if-exists-then-else(%:getenv(PWD /nosys.specs) -specs=nosys.specs)) %:if-exists-then-else(%:getenv(PWD /libc.a) -L.) %:if-exists-then-else(%:getenv(PWD /crtbegin%O) -B.)' --program-prefix=riscv32- --disable-libssp --enable-languages=c --without-headers "$@"
