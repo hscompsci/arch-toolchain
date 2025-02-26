@@ -23,4 +23,4 @@ then
 fi
 shift
 
-exec "$tree/configure" --prefix=/usr/local --target=riscv32-elf --with-arch=rv32i --program-prefix=riscv32- --disable-libssp --enable-languages=c --without-headers "$@"
+exec "$tree/configure" --prefix=/usr/local --target=riscv32-elf --with-arch=rv32i --with-specs='%:if-exists-then-else(%:getenv(PWD /nosys.specs) -specs=nosys.specs)' --program-prefix=riscv32- --disable-libssp --enable-languages=c --without-headers "$@"
