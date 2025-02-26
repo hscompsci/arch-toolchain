@@ -1,15 +1,16 @@
 #!/bin/sh
 
 tree="$1"
-if [ "$#" -ne "1" -o -z "$tree" -o ! -e "$tree/configure" ]
+if [ "$#" -lt "1" -o -z "$tree" -o ! -e "$tree/configure" ]
 then
 	cat <<-tac
-		USAGE: `basename "$0"` <path to binutils source tree>
+		USAGE: `basename "$0"` <path to binutils source tree> [configuration flag]...
 
 		Note that source tarballs to not include the simulator (run command);
 		for that, you must clone the full binutils-gdb repository.
 	tac
 	exit 1
 fi
+shift
 
-exec "$tree/configure" --prefix=/usr/local --target=riscv32 --with-arch=rv32i --disable-gdb --disable-gold --disable-gprof --disable-gprofng
+exec "$tree/configure" --prefix=/usr/local --target=riscv32 --with-arch=rv32i --disable-gdb --disable-gold --disable-gprof --disable-gprofng "$@"

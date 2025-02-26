@@ -1,9 +1,9 @@
 #!/bin/sh
 
 tree="$1"
-if [ "$#" -ne "1" -o -z "$tree" -o ! -e "$tree/configure" ]
+if [ "$#" -lt "1" -o -z "$tree" -o ! -e "$tree/configure" ]
 then
-	echo "USAGE: `basename "$0"` <path to gcc source tree>"
+	echo "USAGE: `basename "$0"` <path to gcc source tree> [configuration flag]..."
 	exit 1
 elif [ ! -e "$tree/bfd" -o ! -e "$tree/binutils" -o ! -e "$tree/gas" -o ! -e "$tree/gnulib" -o ! -e "$tree/ld" -o ! -e "$tree/libctf" -o ! -e "$tree/libsframe" -o ! -e "$tree/opcodes" ]
 then
@@ -21,5 +21,6 @@ then
 	tac
 	exit 2
 fi
+shift
 
-exec "$tree/configure" --prefix=/usr/local --target=riscv32-elf --with-arch=rv32i --program-prefix=riscv32- --disable-libssp --enable-languages=c --without-headers
+exec "$tree/configure" --prefix=/usr/local --target=riscv32-elf --with-arch=rv32i --program-prefix=riscv32- --disable-libssp --enable-languages=c --without-headers "$@"
