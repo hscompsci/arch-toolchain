@@ -1,0 +1,5 @@
+1. Run the command: xattr -d com.apple.quarantine riscv32-toolchain-sim-info.tar
+2. Extract the archive and browse into the resulting usr/local subdirectory in Finder.
+3. Open another Finder window, hit Ctrl+Shift+G, and enter /usr/local.
+4. Select all files in the first Finder window and drag them into the second.
+5. Enter your password when prompted.
