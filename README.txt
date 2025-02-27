@@ -4,8 +4,9 @@ This software distribution includes builds of:
  - GMP 6.3.0, available from https://gmplib.org
  - MPFR 4.2.1, available from https://www.mpfr.org
  - MPC 1.3.1, available from https://www.multiprecision.org
+ - GNU Texinfo, available from https://www.gnu.org/software/texinfo
 
-All are free software. You can redistribute and/or modify GCC and Binutils
+All are free software. You can redistribute and/or modify GCC, Binutils, and Texinfo
 under the terms of the GNU General Public License as published by the Free
 Software Foundation; either version 3, or (at your option) any later version.
 You can redistribute and/or modify GMP, MPFR, and MPC under the terms of the
