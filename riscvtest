@@ -1,0 +1,115 @@
+#!/bin/sh
+
+readonly SIMULATOR="/Applications/logisim-generic-2.7.1.jar"
+readonly TESTSUITE="https://github.com/riscv-software-src/riscv-tests"
+readonly SUBDIRECT="isa/rv32ui"
+readonly EXPECTOUT="01010a"
+
+repo="`basename "$TESTSUITE"`"
+[ -e "$repo" ] || git submodule add "$TESTSUITE" 2>&1 | grep -vF fatal: || git clone "$TESTSUITE"
+[ -e "$repo/env/v" ] || git -C riscv-tests submodule update --init --recursive
+[ -e libc.a ] || touch libc.a
+[ -e crt0.o ] || riscv32-as -o crt0.o <<-sa-23vcsir
+		.globl _start
+	_start:
+		j		userstart
+sa-23vcsir
+
+if [ ! -e "$SIMULATOR" ]
+then
+	echo "ERROR: Did not find Logisim at $SIMULATOR" >&2
+	exit 3
+fi
+
+if ! type riscv32-gcc >/dev/null 2>&1
+then
+	echo "ERROR: Have you installed the RISC-V toolchain?"
+	exit 4
+fi
+
+if ! type logisimage >/dev/null 2>&1
+then
+	echo "ERROR: Have you installed logisimage and marked it executable?"
+	exit 5
+fi
+
+tests="`basename -s.S "$repo/$SUBDIRECT/"*.S`"
+if [ "$#" -lt "1" ]
+then
+	cat <<-tac
+		USAGE: `basename "$0"` <path to Logisim CPU> [test name]...
+
+		Run the official RISC-V test suite.
+
+		<simulator> is the path to your CPU project. It may also contain Logisim command-line options.
+
+		[test name], if provided, limits the instructions to test. Choose from this list:
+		$tests
+	tac
+	exit 1
+fi
+
+flags="$1"
+shift
+
+if [ "$#" -eq "0" ]
+then
+	set -- $tests
+fi
+
+passed="0"
+total="$#"
+show="true"
+for test in "$@"
+do
+	printf %s "Running test '$test'... "
+	if riscv32-gcc -I"$repo/env/v" -I"$repo/isa/macros/scalar" "$repo/$SUBDIRECT/$test.S"
+	then
+		logisimage a.out a.img
+
+		result="`java -jar "$SIMULATOR" -tty tty -load a.img $flags | od -tx1 -An | tr -d " "`"
+		if [ "$result" = "$EXPECTOUT" ]
+		then
+			echo "Passed."
+			passed="$((passed + 1))"
+		else
+			subtest="$((0x$(echo "$result" | head -c2) >> 1))"
+			echo "FAILED in test case $subtest!"
+
+			if "$show"
+			then
+				printf %s "Would you like to see the test (Y/n)? " >&2
+				read choice
+				case "$choice" in
+				n)
+					echo "Declined. Will not ask again." >&2
+					show="false"
+					;;
+				*)
+					symbol="test_$subtest"
+					if [ "$symbol" = "test_2" ]
+					then
+						symbol="userstart"
+					fi
+
+					riscv32-objdump --disassemble="$symbol" -Mnumeric a.out >&2
+					echo >&2
+
+					printf %s "Hit enter to continue..." >&2
+					read choice
+					;;
+				esac
+			fi
+		fi
+	else
+		echo "Skipping test of unsupported instruction."
+		total="$((total - 1))"
+	fi
+done
+
+echo "Passed $passed tests out of $total."
+if [ "$passed" -ne "$total" ]
+then
+	echo "THERE WERE FAILING TESTS!" >&2
+	exit 2
+fi
