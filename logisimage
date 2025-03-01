@@ -1,0 +1,39 @@
+#!/bin/sh
+
+if [ "$#" -lt "1" -o "$#" -gt "2" ]
+then
+	cat <<-tac
+		USAGE: `basename "$0"` <RISC-V executable> [Logisim memory image]
+
+		Convert a RISC-V executable into a Logisim memory image.
+
+		Makes the following simplifying assumptions:
+		 * The .text entry appears first in the executable's section table.
+		 * The .text section begins with the _start symbol, because we ignore entry point metadata.
+		 * The addresses of all loadable sections are sequential, but not necessarily consecutive.
+		 * Any non-loadable sections appear after all loadable sections, because we load everything.
+		 * There are no hardcoded absolute addresses, because we place .text at the start of memory.
+	tac
+	exit 1
+fi
+
+if [ "$#" -eq "2" ]
+then
+	exec >"$2"
+fi
+
+echo "v2.0 raw"
+riscv32-objdump -s "$1" | grep "^ " | cut -d" " -f2-6 | while read line
+do
+	address="`echo "$line" | cut -d" " -f1`"
+	if [ -n "$lastaddr" ]
+	then
+		missing="$((0x$address - 0x$lastaddr - lastsize))"
+		[ "$missing" -gt "0" ] && echo "$missing*00"
+	fi
+	lastaddr="$address"
+
+	data="`echo "$line" | cut -d" " -f2- | tr -d " "`"
+	echo "$data" | sed 's/../ &/g' | tail -c+2
+	lastsize="$(($(printf %s "$data" | wc -c) / 2))"
+done
