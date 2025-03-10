@@ -2,13 +2,8 @@
 exit:
 	.word 0
 
-	.globl putchar
-putchar:
-	ecall
-	ret
-
-	.globl puts
-puts:
+	.globl fputs
+fputs:
 	mv		t0, a0
 	j		.Lcondition
 .Lloop:
@@ -17,4 +12,9 @@ puts:
 .Lcondition:
 	lb		a0, (t0)
 	bne		a0, zero, .Lloop
+	ret
+
+	.globl putchar
+putchar:
+	ecall
 	ret
