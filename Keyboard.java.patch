@@ -1,0 +1,11 @@
+256a257,266
+> 		}
+> 
+> 		// Ensure that at least one full clock tick will elapse before propagate() dequeue()s the
+> 		// first character. This is a workaround for the -tty tty command-line switch losing the
+> 		// first character of some lines of input.
+> 		Object trigger = state.getAttributeValue(StdAttr.EDGE_TRIGGER);
+> 		if (trigger == StdAttr.TRIG_FALLING) {
+> 			keyboardData.setLastClock(Value.FALSE);
+> 		} else {
+> 			keyboardData.setLastClock(Value.TRUE);
