@@ -1,0 +1,67 @@
+#!/bin/sh
+
+readonly EXPECTED_VERSION="2.7.1"
+readonly PROBLEM_FILE="com/cburch/logisim/std/io/Keyboard.java"
+readonly VERSION_FILE="com/cburch/logisim/Main.java"
+
+if [ "$#" -ne "1" ]
+then
+	cat <<-tac
+		USAGE: `basename "$0"` <path to Logisim JAR>
+
+		Patches a Logisim JAR to fix a bug where command-line execution discards the first character
+		of some lines of user input.
+	tac
+	exit 1
+fi
+
+jar="$1"
+version="`java -jar "$jar" -version`"
+if [ "$?" -ne "0" ]
+then
+	exit 2
+fi
+
+if [ "$version" != "$EXPECTED_VERSION" ]
+then
+	echo "Error: This patch only works on Logisim $EXPECTED_VERSION, but you have '$version'" >&2
+	exit 3
+fi
+
+if [ -e com -o -e src ]
+then
+	echo "Error: There is already something named 'com' or 'src' in the current directory"
+	exit 4
+fi
+
+jar -xf "$jar" "src/$PROBLEM_FILE" "src/$SRC_FILE" com
+
+patch "src/$PROBLEM_FILE" <<-hctap
+	256a257,266
+	> 		}
+	> 
+	> 		// Ensure that at least one full clock tick will elapse before propagate() dequeue()s the
+	> 		// first character. This is a workaround for the -tty tty command-line switch losing the
+	> 		// first character of some lines of input.
+	> 		Object trigger = state.getAttributeValue(StdAttr.EDGE_TRIGGER);
+	> 		if (trigger == StdAttr.TRIG_FALLING) {
+	> 			keyboardData.setLastClock(Value.FALSE);
+	> 		} else {
+	> 			keyboardData.setLastClock(Value.TRUE);
+hctap
+javac -d . "src/$PROBLEM_FILE"
+
+patch "src/$VERSION_FILE" <<-hctap
+	28c28
+	< 	public static final String VERSION_NAME = VERSION.toString();
+	---
+	> 	public static final String VERSION_NAME = VERSION + " with tty patch";
+hctap
+javac -d . "src/$VERSION_FILE"
+
+classname() {
+	printf "%s\n" "`dirname "$1"`/`basename -s.java "$1"`.class"
+}
+
+jar -uf "$jar" "`classname "$PROBLEM_FILE"`" "`classname "$VERSION_FILE"`"
+rm -r com src
