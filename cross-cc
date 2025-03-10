@@ -33,6 +33,11 @@ then
 fi
 
 stdlibs="$prefix/lib/gcc/riscv32-elf/`cat "$tree/gcc/BASE-VER"`"
+if [ -e "$prefix/lib" ]
+then
+	echo "NOTE: If you are planning to distribute a prebuilt toolchain, you should have cleaned out $prefix before running this script!"
+	sleep 5
+fi
 
 do=""
 if ! mkdir -p "$stdlibs" 2>/dev/null
