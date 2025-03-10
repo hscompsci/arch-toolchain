@@ -15,23 +15,24 @@ repo="`basename "$TESTSUITE"`"
 		j		userstart
 sa-23vcsir
 
-if [ ! -e "$SIMULATOR" ]
-then
-	echo "ERROR: Did not find Logisim at $SIMULATOR" >&2
-	exit 3
-fi
-
 if ! type riscv32-gcc >/dev/null 2>&1
 then
 	echo "ERROR: Have you installed the RISC-V toolchain?"
-	exit 4
+	exit 3
 fi
 
 if ! type logisimage >/dev/null 2>&1
 then
 	echo "ERROR: Have you installed logisimage and marked it executable?"
-	exit 5
+	exit 4
 fi
+
+sim="$SIMULATOR"
+while [ ! -e "$sim" ]
+do
+	printf %s "Did not find Logisim at $sim. Enter correct path: " 2>&1
+	read sim
+done
 
 tests="`basename -s.S "$repo/$SUBDIRECT/"*.S`"
 if [ "$#" -lt "1" ]
@@ -69,7 +70,7 @@ do
 	then
 		logisimage a.out a.img
 
-		result="`java -jar "$SIMULATOR" -tty tty -load a.img $flags | od -tx1 -An | tr -d " "`"
+		result="`java -jar "$sim" -tty tty -load a.img $flags | od -tx1 -An | tr -d " "`"
 		if [ "$result" = "$EXPECTOUT" ]
 		then
 			echo "Passed."
