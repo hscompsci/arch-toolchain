@@ -18,3 +18,16 @@ fputs:
 putchar:
 	ecall
 	ret
+
+	.globl puts
+puts:
+	addi	sp, sp, -16
+	sw		ra, (sp)
+
+	call	fputs
+	li		a0, '\n'
+	call	putchar
+
+	lw		ra, (sp)
+	addi	sp, sp, 16
+	ret
