@@ -14,6 +14,11 @@ fputs:
 	bne		a0, zero, .Lloop
 	ret
 
+	.globl getchar
+getchar:
+	ebreak
+	ret
+
 	.globl putchar
 putchar:
 	ecall
