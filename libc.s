@@ -6,6 +6,7 @@ exit:
 fgets:
 	mv		t0, a0
 	add		t1, a0, a1
+	addi	t1, t1, -1
 	li		t2, '\n'
 	mv		t3, a0
 .Lfgets_loop:
