@@ -42,7 +42,8 @@ then
 
 		Run the official RISC-V test suite.
 
-		<simulator> is the path to your CPU project. It may also contain Logisim command-line options.
+		<simulator> is the path to your CPU project, which cannot contain spaces.
+		It may, however, contain Logisim command-line options.
 
 		[test name], if provided, limits the instructions to test. Choose from this list:
 		$tests
