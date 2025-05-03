@@ -3,7 +3,7 @@
 readonly SIMULATOR="/Applications/logisim-generic-2.7.1.jar"
 readonly TESTSUITE="https://github.com/riscv-software-src/riscv-tests"
 readonly SUBDIRECT="isa/rv32ui"
-readonly EXPECTOUT="01010a"
+readonly EXPECTOUT="01"
 
 repo="`basename "$TESTSUITE"`"
 [ -e "$repo" ] || git submodule add "$TESTSUITE" 2>&1 | grep -vF fatal: || git clone "$TESTSUITE"
@@ -71,7 +71,10 @@ do
 		logisimage a.out a.img
 
 		result="`java -jar "$sim" -tty tty -load a.img $flags | od -tx1 -An | tr -d " "`"
-		if [ "$result" = "$EXPECTOUT" ]
+		newline="`printf "\n" | od -tx1 -An | tr -d " "`"
+
+		# If the CPU implements unimp as ecall, the success message will be doubled.
+		if [ "$result" = "$EXPECTOUT$newline" -o "$result" = "$EXPECTOUT$EXPECTOUT$newline" ]
 		then
 			echo "Passed."
 			passed="$((passed + 1))"
